@@ -1,0 +1,12 @@
+<p>Estas buscado: <strong>{{ query }}</strong></p> 
+ 
+{% if sitios %} 
+    <p>Sitios encontrados: {{ sitios|length }} sitio{{ sitios|pluralize }}.</p> 
+    <ul> 
+        {% for sitios in sitios %} 
+            <li>{{ sitios.descripcion }}</li> 
+        {% endfor %} 
+    </ul> 
+{% else %} 
+    <p>Ningún sitios coincide con el criterio de búsqueda.</p> 
+{% endif %} 
