@@ -1,19 +1,20 @@
 from django.db import models
 from django_resized import ResizedImageField
+from django.contrib.auth.models import User
 
 # Create your models here.
 
-class Usuarios(models.Model):
-    usuario = models.CharField(max_length=30)
-    nombre = models.CharField(max_length=30)
-    mail = models.EmailField()
-    imei = models.CharField(max_length=15)
-
-    def __str__(self):  
-        return self.usuario 
-
-    class Meta: 
-        verbose_name_plural = "Usuarios" 
+#class Usuarios(models.Model):
+#    usuario = models.CharField(max_length=30)
+#    nombre = models.CharField(max_length=30)
+#    mail = models.EmailField()
+#    imei = models.CharField(max_length=15)
+#
+#    def __str__(self):  
+#        return self.usuario 
+#
+#    class Meta: 
+#        verbose_name_plural = "Usuarios" 
 
 class Tipos(models.Model):
     tipo = models.CharField(max_length=30)
@@ -36,7 +37,7 @@ class Provincias(models.Model):
 
 class Sitios(models.Model):
     descripcion = models.TextField(max_length=4096)
-    usuario = models.ForeignKey(Usuarios)
+    usuario = models.ForeignKey(User)
     tipo = models.ForeignKey(Tipos)
     provincia = models.ForeignKey(Provincias)
     latitud = models.CharField(max_length=30)
@@ -54,7 +55,7 @@ class Sitios(models.Model):
         verbose_name_plural = "Sitios" 
     
 class Favoritos(models.Model):
-    usuario = models.ForeignKey(Usuarios)
+    usuario = models.ForeignKey(User)
     sitio = models.ForeignKey(Sitios)
     
     def __str__(self):

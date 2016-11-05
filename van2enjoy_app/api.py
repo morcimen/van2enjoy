@@ -3,7 +3,8 @@ from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie import fields
 from tastypie.resources import ModelResource
-from van2enjoy_app.models import Usuarios
+from django.contrib.auth.models import User
+#from van2enjoy_app.models import Usuarios
 from van2enjoy_app.models import Sitios
 from van2enjoy_app.models import Tipos
 from van2enjoy_app.models import Provincias
@@ -28,19 +29,19 @@ class TiposResource(ModelResource):
         allowed_methods = ['get']
 
 class UsuariosResource(ModelResource):
-    class Meta:
-        queryset = Usuarios.objects.all()
+    class Meta: 
+        queryset = User.objects.all()
         resource_name = 'usuarios'
         filtering = {
-            'usuario': ALL,
-            'nombre' : ALL,
-            'mail' : ALL,
+            'username': ALL,
+            'First name' : ALL,
+            'Email address' : ALL,
             'id' : ALL,
         }
         allowed_methods = ['get']
  
 class ProvinciasResource(ModelResource):
-    class Meta:
+    class Meta: 
         queryset = Provincias.objects.all()
         resource_name = 'provincias'
         filtering = {

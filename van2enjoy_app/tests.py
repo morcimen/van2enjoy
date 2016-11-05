@@ -1,7 +1,8 @@
 from django.test import TestCase
 from tastypie.test import ResourceTestCaseMixin
-from van2enjoy_app.models import Usuarios, Tipos, Provincias
+from van2enjoy_app.models import Tipos, Provincias
 from van2enjoy_app.models import Sitios, Favoritos, Fotos
+from django.contrib.auth.models import User
 import json
 
 class TiposResourceTest(ResourceTestCaseMixin, TestCase):
@@ -25,7 +26,7 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
             - Nada
         """
         Tipos.objects.create(tipo = "tipo1")
-        Usuarios.objects.create(usuario = "usuario1", nombre = "usuario1", imei = "1234567", mail = "usuario1@loquesea.com")
+        User.objects.create(username = "usuario1", email = "usuario1@loquesea.com")
         Provincias.objects.create(provincia = "provincia1")
         
         uris = self.consulta_uris()
@@ -89,7 +90,7 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
         
         uris = {}
         tipo = Tipos.objects.get(tipo = "tipo1")
-        usuario = Usuarios.objects.get(usuario = "usuario1")
+        usuario = User.objects.get(username = "usuario1")
         provincia = Provincias.objects.get(provincia = "provincia1")
         uris['tipo'] = "/api/v1/tipos/%d/" %tipo.pk
         uris['usuario'] = "/api/v1/usuarios/%d/" %usuario.pk
@@ -105,13 +106,13 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
     
     def test_consulta_tus_favoritos(self):
         self.crea_estructura_de_datos_basica()
-        resp = self.api_client.get('/api/v1/favoritos/?usuario__usuario=usuario1',format='json')
+        resp = self.api_client.get('/api/v1/favoritos/?usuario__username=usuario1',format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']),1)
     
     def test_consulta_tus_sitios(self):
         self.crea_estructura_de_datos_basica()
-        resp = self.api_client.get('/api/v1/sitios/?usuario__usuario=usuario1',format='json')
+        resp = self.api_client.get('/api/v1/sitios/?usuario__username=usuario1',format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']),1)
     
