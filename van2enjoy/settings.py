@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 import os.path
+import logging.config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -134,3 +135,44 @@ MEDIA_ROOT = 'media/'
 DJANGORESIZED_DEFAULT_SIZE = [640, 480]
 DJANGORESIZED_DEFAULT_QUALITY = 75
 DJANGORESIZED_DEFAULT_KEEP_META = True
+
+#LOGGING_CONFIG = None
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+    },
+    'handlers': {
+        'logfile': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/home/raul/desarrollos_python/virtualenv_con_python3/Proyectos/van2enjoy/van2enjoy.log',
+            'formatter': 'standard'
+        },
+        'console':{
+            'level':'INFO',
+            'class':'logging.StreamHandler',
+            #'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'van2enjoy_app': {
+            'handlers': ['logfile'],
+            'level': 'DEBUG',
+        },
+    },
+}

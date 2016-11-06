@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 
 from django.contrib import admin 
-from van2enjoy_app.models import Tipos, Sitios, Provincias, Favoritos, Fotos
+from van2enjoy_app.models import Tipos, Sitios, Provincias, Favoritos, Fotos, Imeis
 
 class SitiosAdmin(admin.ModelAdmin):
     list_display = ('descripcion','provincia','usuario','tipo','fecha_creacion','fecha_modificacion',)
@@ -13,9 +13,13 @@ class SitiosAdmin(admin.ModelAdmin):
  
 class FavoritosAdmin(admin.ModelAdmin):
     list_display = ('sitio','usuario',)
-    
+
+class ImeisAdmin(admin.ModelAdmin):
+    list_display = ('usuario','imei',)
+
 admin.site.register(Tipos) 
-admin.site.register(Sitios,SitiosAdmin) 
+admin.site.register(Sitios, SitiosAdmin) 
 admin.site.register(Provincias)
-admin.site.register(Favoritos,FavoritosAdmin)
+admin.site.register(Favoritos, FavoritosAdmin)
 admin.site.register(Fotos)
+admin.site.register(Imeis, ImeisAdmin)

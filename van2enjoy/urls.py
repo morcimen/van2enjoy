@@ -21,6 +21,7 @@ from van2enjoy_app.api import TiposResource
 from van2enjoy_app.api import ProvinciasResource
 from van2enjoy_app.api import FavoritosResource
 from van2enjoy_app.api import FotosResource
+from van2enjoy_app.api import LoginResource
 
 from tastypie.api import Api
 
@@ -31,6 +32,7 @@ v1_api.register(TiposResource())
 v1_api.register(ProvinciasResource())
 v1_api.register(FavoritosResource())
 v1_api.register(FotosResource())
+v1_api.register(LoginResource())
 
 entry_resource = UsuariosResource()
 
