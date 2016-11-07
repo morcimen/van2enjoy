@@ -1,14 +1,28 @@
 from django.test import TestCase
 from tastypie.test import ResourceTestCaseMixin
 from van2enjoy_app.models import Tipos, Provincias
-from van2enjoy_app.models import Sitios, Favoritos, Fotos
+from van2enjoy_app.models import Sitios, Favoritos, Fotos, Imeis
 from django.contrib.auth.models import User
 import json
 
 class TiposResourceTest(ResourceTestCaseMixin, TestCase):
     
-    #def setUp(self):
-        #super(TiposResourceTest, self).setUp()
+    def setUp(self):
+        super(TiposResourceTest, self).setUp()
+        self.tipo = "tipo1"
+        self.usuario = "usuario1"
+        self.password = "elqueseaquecumpla123"
+        self.email = "usuario1@loquesea.com"
+        self.provincia = "provincia1"
+        self.imei = "1234"
+        
+        #api_key = login(
+        
+    def login(self):
+        post_data = { "username" : self.usuario, "password" : self.password, "imei" : self.imei }
+        resp = self.api_client.post('/api/v1/login/', format='json', data=post_data)
+        return(self.deserialize(resp)['apikey'])
+        
 
     def genera_uri(self,variable):
         return "/api/v1/%s/1/" %variable
@@ -25,11 +39,19 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
         Return:
             - Nada
         """
-        Tipos.objects.create(tipo = "tipo1")
-        User.objects.create(username = "usuario1", email = "usuario1@loquesea.com")
-        Provincias.objects.create(provincia = "provincia1")
+
+        Tipos.objects.create(tipo=self.tipo)
+        User.objects.create(username=self.usuario, email=self.email)
+        self.user = User.objects.get(username=self.usuario)
+        self.user.set_password(self.password)
+        self.user.save()
+        Provincias.objects.create(provincia = self.provincia)
+        
+        Imeis.objects.create(imei=self.imei, usuario=self.user)
         
         uris = self.consulta_uris()
+        
+        self.api_key = self.login()
         
         # Se añade un sitio
         resp = self.crea_sitio(uris['provincia'],uris['tipo'],uris['usuario'])
@@ -58,7 +80,8 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
             "tipo": uri_tipo,
             "usuario": uri_usuario
             }
-        resp = self.api_client.post('/api/v1/sitios/', format='json', data=self.post_data)
+        resp = self.api_client.post('/api/v1/sitios/?username=%s&api_key=%s' 
+            %(self.usuario,self.api_key), format='json', data=self.post_data)
         return resp
     
     def crea_favorito(self,uri_sitio,uri_usuario):
@@ -66,14 +89,16 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
             "sitio" : uri_sitio,
             "usuario" : uri_usuario
             }
-        resp = self.api_client.post('/api/v1/favoritos/', format='json', data=self.post_data)
+        resp = self.api_client.post('/api/v1/favoritos/?username=%s&api_key=%s'
+            %(self.usuario,self.api_key), format='json', data=self.post_data)
         return resp
     
     def crea_foto(self,uri_sitio):
         self.post_data = {
             "sitio" : uri_sitio
             }
-        resp = self.api_client.post('/api/v1/fotos/', format='json', data=self.post_data)
+        resp = self.api_client.post('/api/v1/fotos/?username=%s&api_key=%s' 
+            %(self.usuario,self.api_key), format='json', data=self.post_data)
         return resp
     
     def consulta_uris(self):
@@ -89,9 +114,9 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
         """
         
         uris = {}
-        tipo = Tipos.objects.get(tipo = "tipo1")
-        usuario = User.objects.get(username = "usuario1")
-        provincia = Provincias.objects.get(provincia = "provincia1")
+        tipo = Tipos.objects.get(tipo = self.tipo)
+        usuario = User.objects.get(username = self.usuario)
+        provincia = Provincias.objects.get(provincia = self.provincia)
         uris['tipo'] = "/api/v1/tipos/%d/" %tipo.pk
         uris['usuario'] = "/api/v1/usuarios/%d/" %usuario.pk
         uris['provincia'] = "/api/v1/provincias/%d/" %provincia.pk
@@ -100,19 +125,22 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
     
     def test_consulta_info_cuenta(self):
         self.crea_estructura_de_datos_basica()
-        resp = self.api_client.get('/api/v1/usuarios/?usuario=usuario1',format='json')
+        resp = self.api_client.get('/api/v1/usuarios/?usuario=%s&username=%s&api_key=%s' 
+            %(self.usuario, self.usuario, self.api_key), format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']),1)
     
     def test_consulta_tus_favoritos(self):
         self.crea_estructura_de_datos_basica()
-        resp = self.api_client.get('/api/v1/favoritos/?usuario__username=usuario1',format='json')
+        resp = self.api_client.get('/api/v1/favoritos/?usuario__username=%s&username=%s&api_key=%s' 
+            %(self.usuario, self.usuario, self.api_key), format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']),1)
     
     def test_consulta_tus_sitios(self):
         self.crea_estructura_de_datos_basica()
-        resp = self.api_client.get('/api/v1/sitios/?usuario__username=usuario1',format='json')
+        resp = self.api_client.get('/api/v1/sitios/?usuario__username=%s&username=%s&api_key=%s' 
+            %(self.usuario,self.usuario,self.api_key), format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']),1)
     
@@ -123,20 +151,23 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
         for i in range(40):
             self.crea_sitio(uris['provincia'],uris['tipo'],uris['usuario'])
         
-        resp = self.api_client.get('/api/v1/sitios/?order_by=-fecha_creacion',format='json')
+        resp = self.api_client.get('/api/v1/sitios/?order_by=-fecha_creacion&username=%s&api_key=%s'
+            %(self.usuario,self.api_key), format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']),20)
     
     def test_consulta_sitio_por_id(self):
         self.crea_estructura_de_datos_basica()
         sitio = Sitios.objects.get(descripcion="Prueba api_client")
-        resp = self.api_client.get('/api/v1/sitios/%s/'%sitio.pk,format='json')
+        resp = self.api_client.get('/api/v1/sitios/%s/?username=%s&api_key=%s'
+            %(sitio.pk,self.usuario,self.api_key),format='json')
         self.assertHttpOK(resp)
     
     def test_desmarca_favorito(self):
         self.crea_estructura_de_datos_basica()
         favorito = Favoritos.objects.get(sitio__descripcion="Prueba api_client")
-        resp = self.api_client.delete('/api/v1/favoritos/%s/'%favorito.pk, format='json')
+        resp = self.api_client.delete('/api/v1/favoritos/%s/?username=%s&api_key=%s'
+            %(favorito.pk, self.usuario, self.api_key), format='json')
         self.assertHttpAccepted(resp)
     
     def test_consulta_foto_por_id_sitio(self):
@@ -146,21 +177,18 @@ class TiposResourceTest(ResourceTestCaseMixin, TestCase):
     def test_elimina_sitio(self):
         self.crea_estructura_de_datos_basica()
         sitio = Sitios.objects.get(descripcion="Prueba api_client")
-        resp = self.api_client.delete('/api/v1/sitios/%s/'%sitio.pk, format='json')
+        resp = self.api_client.delete('/api/v1/sitios/%s/?username=%s&api_key=%s'
+            %(sitio.pk, self.usuario, self.api_key), format='json')
         self.assertHttpAccepted(resp)
     
     def test_elimina_foto(self):
         self.crea_estructura_de_datos_basica()
         foto = Fotos.objects.get(sitio__descripcion="Prueba api_client")
-        resp = self.api_client.delete('/api/v1/fotos/%s/'%foto.pk, format='json')
+        resp = self.api_client.delete('/api/v1/fotos/%s/?username=%s&api_key=%s'
+            %(foto.pk, self.usuario, self.api_key), format='json')
         self.assertHttpAccepted(resp)
     
-    #def test_elimina_favorito_fotos_sitio(self):
-    #    self.crea_estructura_de_datos_basica()
-    #    uris = self.consulta_uris()
-    #    for recurso in ["favoritos", "fotos", "sitios"]:
-    #        resp = self.api_client.delete(uris[recurso[:-1]], format='json')
-    #        self.assertHttpAccepted(resp)
+
     
 
  

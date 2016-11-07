@@ -1,4 +1,4 @@
-
+from tastypie.authentication import ApiKeyAuthentication
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie import fields
@@ -36,6 +36,8 @@ class UsuariosResource(ModelResource):
     class Meta: 
         queryset = User.objects.all()
         resource_name = 'usuarios'
+        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
         filtering = {
             'username': ALL,
             'First name' : ALL,
@@ -63,6 +65,7 @@ class SitiosResource(ModelResource):
     class Meta:
         queryset = Sitios.objects.all().select_related("usuario","provincia","tipo")
         authorization = Authorization()
+        authentication = ApiKeyAuthentication()
         filtering = {
             "id" : ALL,
             "descripcion" : ALL,
@@ -82,6 +85,8 @@ class FavoritosResource(ModelResource):
    class Meta:
         queryset = Favoritos.objects.all() 
         authorization = Authorization()
+        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
         filtering = {
             "sitio" : ALL_WITH_RELATIONS,
             "usuario" : ALL_WITH_RELATIONS,
@@ -97,6 +102,8 @@ class FotosResource(MultipartResourceMixin, ModelResource):
     class Meta:
         queryset = Fotos.objects.all() 
         authorization = Authorization()
+        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
         filtering = {
             "sitio" : ALL_WITH_RELATIONS,
         }
@@ -140,14 +147,13 @@ class LoginResource(ModelResource):
         Return:
             - Respuesta HTTP
         """
-           
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
         username = data.get('username', '')
         password = data.get('password', '')
         imei = data.get('imei', '')
-        logger.debug("Iniciando autenticación para el usuario: '%s' con imei: '%s'"
-            %(username,imei))
+        logger.debug("Iniciando autenticación para el usuario: '%s' con password: '%s' e imei: '%s'"
+            %(username,password,imei))
         if not username or not password or not imei:
             logger.debug("Falta usuario, password y/o imei")
             return self.create_response(request, {
@@ -213,8 +219,6 @@ class LoginResource(ModelResource):
         """
         imei = Imeis.objects.get(usuario__username=usuario)
         if imei.imei == imei_request:
-            logger.debug(imei.imei)
-            logger.debug(imei_request)
             return True
         else:
             return False
