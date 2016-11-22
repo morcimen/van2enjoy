@@ -9,7 +9,7 @@ class SitiosAdmin(admin.ModelAdmin):
     list_display = ('descripcion','provincia','usuario','tipo','fecha_creacion','fecha_modificacion',)
     search_fields = ('descripcion',)
     list_filter = ('usuario','tipo','fecha_creacion','fecha_modificacion')
-    fields = ('descripcion','provincia','tipo','usuario','aguapotable','servicios','restauracion')
+    fields = ('descripcion','provincia','tipo','usuario','aguapotable','servicios','restauracion','latitud','longitud')
  
 class FavoritosAdmin(admin.ModelAdmin):
     list_display = ('sitio','usuario',)
